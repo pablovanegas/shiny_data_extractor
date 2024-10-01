@@ -1,3 +1,8 @@
+library(shiny)
+library(readxl)
+library(stringr)
+library(openxlsx)  
+library(shinythemes)
 server <- function(input, output, session) {
   
   # Dark mode function
@@ -8,6 +13,40 @@ server <- function(input, output, session) {
       tags$script("document.body.classList.remove('dark-mode');")
     }
   })
+  #----------------------------------------------------------------------#
+  
+  # Funciones 
+  
+  extraer_correos <- function(data, email_pattern) {
+    correos <- c()
+    for (entry in data) {
+      correos_found <- str_extract_all(entry, email_pattern)[[1]]
+      correos <- unique(c(correos, correos_found))
+    }
+    return(correos)
+  }
+  
+  extraer_numeros <- function(data, phone_pattern) {
+    numeros <- c()
+    for (entry in data) {
+      numeros_found <- str_extract_all(entry, phone_pattern)[[1]]
+      numeros <- unique(c(numeros, numeros_found))
+    }
+    return(numeros)
+  }
+  
+  extraer_urls <- function(data, url_pattern) {
+    urls <- c()
+    for (entry in data) {
+      urls_found <- str_extract_all(entry, url_pattern)[[1]]
+      urls <- unique(c(urls, urls_found))
+    }
+    return(urls)
+  }
+  
+  #---------------------------------------------------------------------#
+  
+  # Reactivos
   
   # Store the original file content
   originalFileContent <- reactiveVal(NULL)
@@ -18,6 +57,9 @@ server <- function(input, output, session) {
     phone = list(),
     url = list()
   )
+  
+  #---------------------------------------------------------------------#
+  
   
   # Function to read file based on type
   read_file <- function(file, file_type) {
@@ -46,35 +88,24 @@ server <- function(input, output, session) {
   }
   
   # Function to extract data based on multiple patterns
-  extract_data <- function(data, patterns, columns = NULL) {
-    extracted <- c()
+  extract_data <- function(data, patterns) {
+    extracted <- list()
     
     for (pattern in patterns) {
-      if (is.data.frame(data) && !is.null(columns)) {
-        for (col_name in columns) {
-          column_data <- na.omit(as.character(data[[col_name]]))
-          for (entry in column_data) {
-            extracted <- c(extracted, str_extract_all(entry, pattern)[[1]])
-          }
-        }
-      } else if (is.character(data)) {
-        extracted <- c(extracted, unlist(regmatches(data, gregexpr(pattern, data))))
-      }
+      matches <- stringr::str_extract_all(data, pattern, vectorize = TRUE)
+      extracted[[pattern]] <- unlist(matches)
     }
     
-    unique(extracted)
+    extracted
   }
+
   
   # Default patterns
   email_pattern <- "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
   phone_pattern <- "\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b"
   url_pattern <- "https?://(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&//=]*)"
   
-  # Function to validate emails
-  validate_email <- function(email) {
-    grepl("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email)
-  }
-  
+
   # Function to validate URLs
   validate_url <- function(url) {
     grepl("^(http|https)://[a-z0-9]+([-.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(/.*)?$", url)
@@ -113,15 +144,47 @@ server <- function(input, output, session) {
   observeEvent(input$file, {
     req(input$file)
     
-    file_type <- input$file_type
-    file_ext <- tolower(tools::file_ext(input$file$name))
+    file_type <- switch(input$file_type,
+                        "CSV" = "csv",
+                        "XLSX" = "xlsx",
+                        "TXT" = 'txt')
     
-    expected_ext <- switch(file_type,
-                           "CSV" = "csv",
-                           "XLSX" = "xlsx",
-                           "TXT" = "txt")
+    data_sheet <- tryCatch(
+      switch(file_type,
+             "csv" = {
+               sep <- if (input$csv_sep!= "Other") input$csv_sep else input$csv_other
+               read.csv(input$file$datapath, sep = sep)
+             },
+             "xlsx" = {
+               tryCatch(
+                 read_xlsx(input$file$datapath, sheet = input$excel_sheet),
+                 error = function(e) {
+                   showModal(modalDialog(
+                     title = "Error",
+                     "La hoja de Excel especificada no existe en el archivo subido. Por favor, selecciona una hoja válida.",
+                     easyClose = TRUE
+                   ))
+                   return(NULL)
+                 }
+               )
+             },
+             "txt" = {
+               readLines(input$file$datapath)
+             }
+      ),
+      error = function(e) {
+        showModal(modalDialog(
+          title = "Error",
+          "El archivo no se pudo leer. Por favor, verifica que el archivo sea válido y que el tipo de archivo seleccionado sea correcto.",
+          easyClose = TRUE
+        ))
+        return(NULL)
+      }
+    )
     
-    if (file_ext != expected_ext) {
+    file_ext <- tools::file_ext(input$file$name)
+    
+    if (tolower(file_ext)!= tolower(input$file_type)) {
       showModal(modalDialog(
         title = "Error",
         "The file extension does not match the selected file type. Please select the correct file type or upload a file with the correct extension.",
@@ -130,61 +193,20 @@ server <- function(input, output, session) {
       return()
     }
     
-    data <- read_file(input$file, file_type)
+    email_pattern <- "([_a-z0-9-]+(?:\\.[_a-z0-9-]+)*@[a-z0-9-]+(?:\\.[a-z0-9-]+)*(?:\\.[a-z]{2,63}))"
+    phone_pattern <- "\\d{3}[-.]?\\d{3}[-.]?\\d{4}"
+    url_pattern <- "https?://(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&//=]*)"
     
-    if (is.null(data)) return()
+    correos <- extraer_correos(data_sheet, email_pattern)
+    numeros <- extraer_numeros(data_sheet, phone_pattern)
+    urls <- extraer_urls(data_sheet, url_pattern)
     
-    if (file_type %in% c("CSV", "XLSX")) {
-      output$checkbox_group <- renderUI({
-        checkboxGroupInput("columns", "Select columns:", choices = names(data))
-      })
-    }
+    originalFileContent(correos)
+    originalFileContent(numeros)
+    originalFileContent(urls)
     
-    observe({
-      req(input$extract_types)
-      extracted_data <- list()
-      
-      if ("Emails" %in% input$extract_types) {
-        email_patterns <- if (input$use_custom_email_pattern) 
-          c(custom_patterns$email, input$email_pattern) 
-        else 
-          email_pattern
-        emails <- extract_data(data, email_patterns, if (file_type %in% c("CSV", "XLSX")) input$columns else NULL)
-        if (input$validate_email) {
-          emails <- emails[sapply(emails, validate_email)]
-        }
-        extracted_data$Emails <- emails
-      }
-      
-      if ("Phone Numbers" %in% input$extract_types) {
-        phone_patterns <- if (input$use_custom_phone_pattern) 
-          c(custom_patterns$phone, input$phone_pattern) 
-        else 
-          phone_pattern
-        phones <- extract_data(data, phone_patterns, if (file_type %in% c("CSV", "XLSX")) input$columns else NULL)
-        phones <- sapply(phones, format_phone, format = input$phone_format)
-        extracted_data$`Phone Numbers` <- phones
-      }
-      
-      if ("URLs" %in% input$extract_types) {
-        url_patterns <- if (input$use_custom_url_pattern) 
-          c(custom_patterns$url, input$url_pattern) 
-        else 
-          url_pattern
-        urls <- extract_data(data, url_patterns, if (file_type %in% c("CSV", "XLSX")) input$columns else NULL)
-        if (input$validate_url) {
-          urls <- urls[sapply(urls, validate_url)]
-        }
-        extracted_data$URLs <- urls
-      }
-      
-      originalFileContent(extracted_data)
-      
-      output$contents <- renderDT({
-        datatable(do.call(rbind, lapply(names(extracted_data), function(name) {
-          data.frame(Type = name, Content = extracted_data[[name]])
-        })))
-      })
+    output$contents <- renderTable({
+      data.frame(Content = originalFileContent())
     })
   })
   
