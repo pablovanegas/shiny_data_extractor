@@ -17,6 +17,13 @@ extract_phone_numbers <- function(text) {
   return(unique(phone_numbers))
 }
 
+# Función para extraer URLs
+extract_urls <- function(text) {
+  url_pattern <- "https?://(?:[-\\w.]|(?:%[a-fA-F0-9]{2}))+"
+  urls <- unlist(str_extract_all(text, url_pattern))
+  return(unique(urls))
+}
+
 # Función para leer el archivo y extraer datos
 process_file <- function(file_path, file_type, sep = ",", sheet = 1) {
   if (file_type == "csv") {
