@@ -59,7 +59,7 @@ data_extraction_server <- function(id, file_inputs) {
       return(list(emails = emails, phones = phones, urls = urls))
     }
     
-    # Main extraction logic with progress indication
+    # Main extraction logic with async processing using future_promise
     observeEvent({
       file_inputs$file()
       file_inputs$selected_columns()
@@ -75,51 +75,73 @@ data_extraction_server <- function(id, file_inputs) {
       
       extractionInProgress(TRUE)
       
-      # Use withProgress for user feedback
-      withProgress(message = 'Extracting data...', value = 0, {
+      # Show non-blocking notification for async processing
+      notification_id <- showNotification(
+        "Extracting data in background...", 
+        duration = NULL,
+        closeButton = FALSE,
+        type = "message"
+      )
+      
+      # Prepare data for async processing (must be done in main thread)
+      data <- file_inputs$loaded_data()
+      extract_types <- file_inputs$extract_types()
+      
+      # Prepare text data based on file type and selected columns
+      if (is.data.frame(data)) {
+        selected <- file_inputs$selected_columns()
+        if (is.null(selected) || length(selected) == 0) {
+          text_data <- character(0)
+        } else {
+          text_data <- unlist(data[selected], use.names = FALSE)
+        }
+      } else {
+        text_data <- as.character(data)
+      }
+      
+      # Execute extraction asynchronously using future_promise
+      future_promise({
+        # This code runs in a separate R process
+        extract_data_chunked(text_data, extract_types)
+      }) %...>% (function(extracted) {
+        # This code runs back in the main Shiny session after promise resolves
         
-        tryCatch({
-          data <- file_inputs$loaded_data()
-          
-          # Prepare text data based on file type and selected columns
-          if (is.data.frame(data)) {
-            selected <- file_inputs$selected_columns()
-            if (is.null(selected) || length(selected) == 0) {
-              text_data <- character(0)
-            } else {
-              incProgress(0.2, detail = "Processing selected columns...")
-              text_data <- unlist(data[selected], use.names = FALSE)
-            }
-          } else {
-            incProgress(0.2, detail = "Processing text data...")
-            text_data <- as.character(data)
-          }
-          
-          incProgress(0.3, detail = "Extracting patterns...")
-          
-          # Extract data with chunked processing
-          extracted <- extract_data_chunked(text_data, file_inputs$extract_types())
-          
-          incProgress(0.8, detail = "Finalizing results...")
-          
-          # Normalize lengths for display
-          max_length <- max(length(extracted$emails), length(extracted$phones), length(extracted$urls))
-          if (max_length == 0) max_length <- 1
-          
-          extracted$emails <- c(extracted$emails, rep("", max_length - length(extracted$emails)))
-          extracted$phones <- c(extracted$phones, rep("", max_length - length(extracted$phones)))
-          extracted$urls <- c(extracted$urls, rep("", max_length - length(extracted$urls)))
-          
-          extractedData(extracted)
-          
-          incProgress(1, detail = "Complete!")
-          
-        }, error = function(e) {
-          showNotification(paste("Error during extraction:", e$message), type = "error", duration = 10)
-          extractedData(list(emails = character(0), phones = character(0), urls = character(0)))
-        })
+        # Normalize lengths for display
+        max_length <- max(length(extracted$emails), length(extracted$phones), length(extracted$urls))
+        if (max_length == 0) max_length <- 1
         
+        extracted$emails <- c(extracted$emails, rep("", max_length - length(extracted$emails)))
+        extracted$phones <- c(extracted$phones, rep("", max_length - length(extracted$phones)))
+        extracted$urls <- c(extracted$urls, rep("", max_length - length(extracted$urls)))
+        
+        # Update reactive values
+        extractedData(extracted)
         extractionInProgress(FALSE)
+        
+        # Remove processing notification
+        removeNotification(notification_id)
+        
+        # Show success notification
+        showNotification(
+          paste("Extraction complete!", 
+                sum(nzchar(extracted$emails)) + sum(nzchar(extracted$phones)) + sum(nzchar(extracted$urls)),
+                "items found"),
+          type = "message",
+          duration = 5
+        )
+        
+      }) %...!% (function(error) {
+        # Error handling - runs in main session if promise fails
+        extractionInProgress(FALSE)
+        removeNotification(notification_id)
+        
+        showNotification(
+          paste("Error during extraction:", error$message), 
+          type = "error", 
+          duration = 10
+        )
+        
+        extractedData(list(emails = character(0), phones = character(0), urls = character(0)))
       })
       
     }, ignoreInit = TRUE)
