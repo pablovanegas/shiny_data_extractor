@@ -8,7 +8,7 @@ ui <- page_navbar(
     tags$i(class = "fas fa-search", style = "margin-right: 0.5rem;"),
     "Data Extractor"
   ),
-  
+
   # Modern Bootstrap 5 theme with bslib
   theme = bs_theme(
     version = 5,
@@ -24,24 +24,23 @@ ui <- page_navbar(
     font_scale = 0.95,
     spacer = "1rem"
   ),
-  
+
   # Custom CSS and Font Awesome
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
     tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
     tags$link(
-      rel = "stylesheet", 
+      rel = "stylesheet",
       href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     )
   ),
-  
+
   # ============================================================================
   # Main Tab: Extracted Data
   # ============================================================================
   nav_panel(
     title = "Extracted Data",
     icon = icon("table"),
-    
     layout_sidebar(
       # Sidebar with configuration
       sidebar = sidebar(
@@ -50,7 +49,7 @@ ui <- page_navbar(
           "Configuration"
         ),
         width = 400,
-        
+
         # File input module
         card(
           card_header(
@@ -61,7 +60,7 @@ ui <- page_navbar(
             file_input_ui("file_input")
           )
         ),
-        
+
         # Download section
         card(
           card_header(
@@ -73,11 +72,11 @@ ui <- page_navbar(
           )
         )
       ),
-      
+
       # Main content area
-      # Statistics value boxes
+      # CORRECTED: Statistics value boxes - NOW WITH 4 CARDS (ADDED URLs)
       layout_columns(
-        col_widths = c(4, 4, 4),
+        col_widths = c(3, 3, 3, 3), # 4 equal columns for symmetry
         value_box(
           title = "Total Extracted",
           value = textOutput("total_count"),
@@ -98,9 +97,28 @@ ui <- page_navbar(
           showcase = icon("phone"),
           theme = "success",
           showcase_layout = "left center"
+        ),
+        # NEW: URLs Value Box (Previously Missing)
+        value_box(
+          title = "URLs Found",
+          value = textOutput("url_count"),
+          showcase = icon("link"),
+          theme = "warning",
+          showcase_layout = "left center"
         )
       ),
-      
+
+
+      # Extraction control panel (Manual Trigger)
+      card(
+        card_header(
+          tags$i(class = "fas fa-rocket", style = "margin-right: 0.5rem;"),
+          "Extraction Control"
+        ),
+        card_body(
+          data_extraction_ui("extraction")
+        )
+      ),
 
       # Results table
       card(
@@ -122,17 +140,15 @@ ui <- page_navbar(
       )
     )
   ),
-  
+
   # ============================================================================
   # Tutorial Tab
   # ============================================================================
   nav_panel(
     title = "Tutorial",
     icon = icon("graduation-cap"),
-    
     layout_columns(
       col_widths = 12,
-      
       card(
         card_header(
           tags$h3(
@@ -144,7 +160,7 @@ ui <- page_navbar(
         card_body(
           layout_columns(
             col_widths = c(6, 6),
-            
+
             # Left column - Steps 1-4
             div(
               div(
@@ -180,7 +196,7 @@ ui <- page_navbar(
                 tags$p("For CSV files, select the appropriate delimiter. For Excel files, specify the sheet number.")
               )
             ),
-            
+
             # Right column - Steps 5-7
             div(
               div(
@@ -211,7 +227,7 @@ ui <- page_navbar(
           )
         )
       ),
-      
+
       # Supported Formats
       card(
         card_header(
@@ -224,7 +240,6 @@ ui <- page_navbar(
         card_body(
           layout_columns(
             col_widths = c(4, 4, 4),
-            
             div(
               class = "format-card text-center",
               tags$i(class = "fas fa-file-csv fa-3x text-success mb-3"),
@@ -246,7 +261,7 @@ ui <- page_navbar(
           )
         )
       ),
-      
+
       # Extraction Patterns
       card(
         card_header(
@@ -259,7 +274,6 @@ ui <- page_navbar(
         card_body(
           layout_columns(
             col_widths = c(4, 4, 4),
-            
             div(
               class = "pattern-card text-center",
               tags$i(class = "fas fa-envelope fa-3x text-primary mb-3"),
@@ -283,17 +297,15 @@ ui <- page_navbar(
       )
     )
   ),
-  
+
   # ============================================================================
   # About Tab
   # ============================================================================
   nav_panel(
     title = "About",
     icon = icon("info-circle"),
-    
     layout_columns(
       col_widths = 12,
-      
       card(
         card_header(
           tags$h3(
@@ -307,12 +319,9 @@ ui <- page_navbar(
             class = "lead",
             "Shiny Data Extractor is a production-grade, interactive R Shiny application designed to extract emails, phone numbers, and URLs from various data formats."
           ),
-          
           tags$hr(),
-          
           layout_columns(
             col_widths = c(6, 6),
-            
             div(
               tags$h4(
                 tags$i(class = "fas fa-star", style = "margin-right: 0.5rem;"),
@@ -329,7 +338,6 @@ ui <- page_navbar(
                 tags$li("Responsive mobile design")
               )
             ),
-            
             div(
               tags$h4(
                 tags$i(class = "fas fa-rocket", style = "margin-right: 0.5rem;"),
@@ -347,9 +355,7 @@ ui <- page_navbar(
               )
             )
           ),
-          
           tags$hr(),
-          
           card(
             class = "bg-light",
             card_body(
@@ -366,7 +372,7 @@ ui <- page_navbar(
               ),
               tags$p(
                 tags$strong("Version:"),
-                " 2.0.0 (Bootstrap 5 Refactored)",
+                " 2.1.0 (UI/UX Enhanced)",
                 tags$br(),
                 tags$strong("Last Updated:"),
                 " November 2025"
@@ -377,7 +383,7 @@ ui <- page_navbar(
       )
     )
   ),
-  
+
   # ============================================================================
   # Navbar Items (Dark Mode Toggle)
   # ============================================================================
@@ -387,7 +393,7 @@ ui <- page_navbar(
       class = "nav-link",
       style = "cursor: pointer; padding: 0.5rem 1rem;",
       input_dark_mode(
-        id = "dark_mode", 
+        id = "dark_mode",
         mode = "light",
         style = "display: inline-flex; align-items: center; gap: 0.5rem;"
       ),

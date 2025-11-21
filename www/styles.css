@@ -260,6 +260,113 @@ table.dataTable tbody td {
   margin-bottom: 0;
 }
 
+/* Extraction Control Panel Styling */
+.extraction-control-panel {
+  padding: 0.5rem 0;
+}
+
+.extraction-control-panel .btn-lg {
+  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.extraction-control-panel .btn-lg:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.extraction-control-panel .btn-lg:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.extraction-control-panel .alert {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Column Selection Actions */
+.column-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.column-actions .btn-sm {
+  flex: 1;
+  transition: all 0.2s ease;
+}
+
+/* CSV/Excel Options Panels */
+.csv-options-panel,
+.excel-options-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgba(var(--bs-info-rgb), 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--bs-info-rgb), 0.2);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* File Upload Container */
+.file-upload-container {
+  position: relative;
+}
+
+.file-input-wrapper {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  background-color: var(--bs-light);
+}
+
+.file-input-wrapper:hover {
+  border-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.02);
+}
+
+/* Column Selection Panel */
+.column-selection-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--bs-light);
+  border-radius: 0.5rem;
+  border: 1px solid var(--bs-border-color);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.column-selection-panel label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+/* File Status Container */
+.file-status-container {
+  margin-top: 1rem;
+}
+
+/* Help Block Styling */
+.help-block {
+  font-size: 0.85rem;
+  color: var(--bs-secondary);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.help-block i {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
 /* Print Styles */
 @media print {
   .bslib-sidebar,
@@ -277,4 +384,31 @@ table.dataTable tbody td {
     border: 1px solid #000;
     box-shadow: none;
   }
+}
+/* Extraction Status Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.extraction-in-progress {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Button States */
+.btn-extraction:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Notification Enhancements */
+.shiny-notification {
+  min-width: 350px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+}
+
+/* Tooltip for URLs */
+span[title] {
+  cursor: help;
+  border-bottom: 1px dotted var(--bs-secondary);
 }

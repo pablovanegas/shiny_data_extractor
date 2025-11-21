@@ -1,6 +1,8 @@
-# filepath: d:\JVANEGASMO\My Documents\shiny_data_extractor-main (1)\shiny_data_extractor-main\modules\data_display_module.R
+# ==============================================================================
 # Data Display Module
 # Manages the display of extracted data table and results summary
+# Enhanced with URL truncation and tooltips
+# ==============================================================================
 
 data_display_ui <- function(id) {
   ns <- NS(id)
@@ -168,7 +170,7 @@ data_display_server <- function(id, extracted_data) {
       table_filter("urls")
     })
     
-    # Enhanced data table with improved styling and functionality
+    # ENHANCED: Data table with URL truncation and better UX
     output$contents <- renderDataTable({
       data <- extracted_data()
       filter_type <- table_filter()
@@ -223,9 +225,22 @@ data_display_server <- function(id, extracted_data) {
       searching = TRUE,
       ordering = TRUE,
       info = TRUE,
-      autoWidth = TRUE,
+      autoWidth = FALSE,
+      # ENHANCED: Column definitions with URL truncation
       columnDefs = list(
-        list(className = "dt-center", targets = "_all")
+        list(className = "dt-center", targets = "_all"),
+        # Truncate URLs column (assumed to be column 2, 0-indexed)
+        list(
+          targets = 2,  # URLs column (0-indexed: Emails=0, Phone Numbers=1, URLs=2)
+          render = JS(
+            "function(data, type, row, meta) {",
+            "  if (type === 'display' && data.length > 50) {",
+            "    return '<span title=\"' + data + '\">' + data.substr(0, 50) + '...</span>';",
+            "  }",
+            "  return data;",
+            "}"
+          )
+        )
       ),
       language = list(
         search = "Search extracted data:",
@@ -246,7 +261,7 @@ data_display_server <- function(id, extracted_data) {
         "$(this.api().table().header()).css({'background-color': 'var(--bg-tertiary)', 'color': 'var(--text-primary)'});",
         "}"
       )
-    ), class = "display nowrap")
+    ), class = "display nowrap cell-border hover")
     
     # Return the data table output for potential external use
     return(reactive(output$contents))
