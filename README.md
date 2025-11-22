@@ -166,24 +166,39 @@ The application is built using **Shiny Modules** following separation of concern
 
 ### Common Issues
 
-**App won't start**
-- Check R version (>= 4.0.0 required)
-- Install missing packages via `app.R`
+**App won't start / Package errors**
+- Ensure R version >= 4.0.0 (`R.version.string`)
+- Run `source("app.R")` for automatic package installation
+- Manually install: `install.packages(c("shiny", "bslib", "DT", "readxl", "openxlsx", "stringr", "promises", "future"))`
+
+**"Start Extraction" button does nothing**
+- Check file upload succeeded (green checkmark in status)
+- Ensure at least one extraction type is selected
+- Verify at least one column is selected (CSV/Excel files)
+- Check browser console for JavaScript errors (F12)
+
+**Extraction results are empty/incomplete**
+- Verify file encoding matches content (try switching between UTF-8/Latin-1 in code)
+- Confirm selected columns contain text data (not purely numeric IDs)
+- Review extraction pattern requirements (emails need `@`, phones need 7+ digits)
+- Check for special characters or encoding issues in source file
 
 **Large file processing is slow**
-- Increase available memory
-- Install `promises` and `future` packages
-- Consider file preprocessing
-
-**Extraction results are incomplete**
-- Verify file encoding (try different character sets)
-- Check column selection for structured data
-- Review extraction pattern requirements
+- Reduce number of selected columns (optimization feature)
+- Install `promises` and `future` packages for async processing
+- Increase available system memory (close other applications)
+- Consider file preprocessing or splitting into smaller batches
 
 **Download fails**
-- Ensure write permissions in download directory
-- Check available disk space
-- Verify extracted data is not empty
+- Ensure browser allows downloads (check popup blockers)
+- Verify extracted data is not empty (check "Total Extracted" card)
+- Check available disk space in download directory
+- Try different export format (.xlsx vs .txt)
+
+**URLs appear truncated in table**
+- This is intentional UI design - hover over URL to see full text in tooltip
+- Full URLs are preserved in downloaded exports
+- Use table search/filter to find specific URLs
 
 ## 📊 Performance Benchmarks
 

@@ -8,7 +8,7 @@ ui <- page_navbar(
     tags$i(class = "fas fa-search", style = "margin-right: 0.5rem;"),
     "Data Extractor"
   ),
-
+  
   # Modern Bootstrap 5 theme with bslib
   theme = bs_theme(
     version = 5,
@@ -24,7 +24,7 @@ ui <- page_navbar(
     font_scale = 0.95,
     spacer = "1rem"
   ),
-
+  
   # Custom CSS and Font Awesome
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
@@ -34,7 +34,7 @@ ui <- page_navbar(
       href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     )
   ),
-
+  
   # ============================================================================
   # Main Tab: Extracted Data
   # ============================================================================
@@ -49,7 +49,7 @@ ui <- page_navbar(
           "Configuration"
         ),
         width = 400,
-
+        
         # File input module
         card(
           card_header(
@@ -60,7 +60,7 @@ ui <- page_navbar(
             file_input_ui("file_input")
           )
         ),
-
+        
         # Download section
         card(
           card_header(
@@ -72,9 +72,9 @@ ui <- page_navbar(
           )
         )
       ),
-
+      
       # Main content area
-      # CORRECTED: Statistics value boxes - NOW WITH 4 CARDS (ADDED URLs)
+      # Statistics value boxes
       layout_columns(
         col_widths = c(3, 3, 3, 3), # 4 equal columns for symmetry
         value_box(
@@ -98,7 +98,6 @@ ui <- page_navbar(
           theme = "success",
           showcase_layout = "left center"
         ),
-        # NEW: URLs Value Box (Previously Missing)
         value_box(
           title = "URLs Found",
           value = textOutput("url_count"),
@@ -107,8 +106,8 @@ ui <- page_navbar(
           showcase_layout = "left center"
         )
       ),
-
-
+      
+      
       # Extraction control panel (Manual Trigger)
       card(
         card_header(
@@ -119,7 +118,7 @@ ui <- page_navbar(
           data_extraction_ui("extraction")
         )
       ),
-
+      
       # Results table
       card(
         full_screen = TRUE,
@@ -140,7 +139,7 @@ ui <- page_navbar(
       )
     )
   ),
-
+  
   # ============================================================================
   # Tutorial Tab
   # ============================================================================
@@ -160,7 +159,7 @@ ui <- page_navbar(
         card_body(
           layout_columns(
             col_widths = c(6, 6),
-
+            
             # Left column - Steps 1-4
             div(
               div(
@@ -196,7 +195,7 @@ ui <- page_navbar(
                 tags$p("For CSV files, select the appropriate delimiter. For Excel files, specify the sheet number.")
               )
             ),
-
+            
             # Right column - Steps 5-7
             div(
               div(
@@ -205,7 +204,7 @@ ui <- page_navbar(
                   tags$span(class = "step-number", "5"),
                   "Select Columns"
                 ),
-                tags$p("Choose specific columns to process for structured data (CSV/Excel files).")
+                tags$p("Choose specific columns to process for structured data (CSV/Excel files). This optimizes performance.")
               ),
               div(
                 class = "tutorial-step",
@@ -227,163 +226,128 @@ ui <- page_navbar(
           )
         )
       ),
-
-      # Supported Formats
-      card(
-        card_header(
-          tags$h3(
-            tags$i(class = "fas fa-file", style = "margin-right: 0.5rem;"),
-            "Supported File Formats",
-            style = "margin: 0;"
-          )
-        ),
-        card_body(
-          layout_columns(
-            col_widths = c(4, 4, 4),
-            div(
-              class = "format-card text-center",
-              tags$i(class = "fas fa-file-csv fa-3x text-success mb-3"),
-              tags$h5("CSV Files"),
-              tags$p("Comma-separated values with customizable delimiters")
-            ),
-            div(
-              class = "format-card text-center",
-              tags$i(class = "fas fa-file-excel fa-3x text-success mb-3"),
-              tags$h5("Excel Files"),
-              tags$p("Microsoft Excel files with multi-sheet support")
-            ),
-            div(
-              class = "format-card text-center",
-              tags$i(class = "fas fa-file-alt fa-3x text-success mb-3"),
-              tags$h5("Text Files"),
-              tags$p("Plain text files with UTF-8 and Latin-1 encoding")
+      
+      # Supported Formats & Capabilities (Simplified for better UX)
+      layout_columns(
+        col_widths = c(6, 6),
+        card(
+          card_header(tags$h5(tags$i(class = "fas fa-file", style="margin-right:0.5rem;"), "Supported Formats")),
+          card_body(
+            tags$ul(
+              tags$li(tags$strong("CSV:"), " Auto-detection of delimiters, UTF-8 support."),
+              tags$li(tags$strong("Excel (XLSX):"), " Multi-sheet support with schema validation."),
+              tags$li(tags$strong("Text (TXT):"), " Unstructured text processing.")
             )
           )
-        )
-      ),
-
-      # Extraction Patterns
-      card(
-        card_header(
-          tags$h3(
-            tags$i(class = "fas fa-magic", style = "margin-right: 0.5rem;"),
-            "Extraction Capabilities",
-            style = "margin: 0;"
-          )
         ),
-        card_body(
-          layout_columns(
-            col_widths = c(4, 4, 4),
-            div(
-              class = "pattern-card text-center",
-              tags$i(class = "fas fa-envelope fa-3x text-primary mb-3"),
-              tags$h5("Email Addresses"),
-              tags$p("Advanced regex patterns with false-positive filtering")
-            ),
-            div(
-              class = "pattern-card text-center",
-              tags$i(class = "fas fa-phone fa-3x text-primary mb-3"),
-              tags$h5("Phone Numbers"),
-              tags$p("International and US/Canada formats supported")
-            ),
-            div(
-              class = "pattern-card text-center",
-              tags$i(class = "fas fa-link fa-3x text-primary mb-3"),
-              tags$h5("URLs"),
-              tags$p("HTTP/HTTPS, FTP, and www domain detection")
+        card(
+          card_header(tags$h5(tags$i(class = "fas fa-magic", style="margin-right:0.5rem;"), "Extraction Engine")),
+          card_body(
+            tags$ul(
+              tags$li(tags$strong("Smart Regex:"), " Filters out image files (e.g., user.png@domain) and invalid phones."),
+              tags$li(tags$strong("Async Core:"), " Processes gigabyte-sized files in background without freezing the UI.")
             )
           )
         )
       )
     )
   ),
-
+  
   # ============================================================================
-  # About Tab
+  # About Tab (PROFESSIONAL PORTFOLIO VERSION)
   # ============================================================================
   nav_panel(
     title = "About",
     icon = icon("info-circle"),
     layout_columns(
       col_widths = 12,
+      
+      # Hero Section & GitHub CTA
       card(
-        card_header(
-          tags$h3(
-            tags$i(class = "fas fa-info-circle", style = "margin-right: 0.5rem;"),
-            "About Data Extractor",
-            style = "margin: 0;"
-          )
-        ),
+        class = "border-0 shadow-sm",
         card_body(
-          tags$p(
-            class = "lead",
-            "Shiny Data Extractor is a production-grade, interactive R Shiny application designed to extract emails, phone numbers, and URLs from various data formats."
-          ),
-          tags$hr(),
-          layout_columns(
-            col_widths = c(6, 6),
+          div(
+            class = "text-center p-4",
+            tags$h2("Shiny Data Extractor", class = "display-5 fw-bold text-primary mb-3"),
+            tags$p(class = "lead text-muted mb-4", 
+                   "A production-grade, open-source tool designed to streamline data scraping and cleaning workflows for Data Scientists."),
+            
+            # GitHub Button
             div(
-              tags$h4(
-                tags$i(class = "fas fa-star", style = "margin-right: 0.5rem;"),
-                "Key Features"
-              ),
-              tags$ul(
-                tags$li("Multi-format file support (CSV, Excel, Text)"),
-                tags$li("Advanced pattern recognition"),
-                tags$li("Column-specific processing"),
-                tags$li("Real-time progress indication"),
-                tags$li("Comprehensive error handling"),
-                tags$li("Export in multiple formats"),
-                tags$li("Dark/Light theme support"),
-                tags$li("Responsive mobile design")
-              )
-            ),
-            div(
-              tags$h4(
-                tags$i(class = "fas fa-rocket", style = "margin-right: 0.5rem;"),
-                "Performance"
-              ),
-              tags$ul(
-                tags$li("Handles large files (GB+)"),
-                tags$li("Asynchronous processing"),
-                tags$li("Memory-efficient chunked reading"),
-                tags$li("Progress tracking"),
-                tags$li("Responsive user interface"),
-                tags$li("Optimized for speed"),
-                tags$li("UTF-8 and Latin-1 encoding support"),
-                tags$li("Sheet selection for Excel files")
-              )
-            )
-          ),
-          tags$hr(),
-          card(
-            class = "bg-light",
-            card_body(
-              tags$h4(
-                tags$i(class = "fas fa-code", style = "margin-right: 0.5rem;"),
-                "Technical Details"
-              ),
-              tags$p(
-                "Built with R Shiny using a modular architecture for maintainability and scalability. Utilizes advanced regex patterns for accurate data extraction and includes comprehensive validation and error handling."
-              ),
-              tags$p(
-                tags$strong("Technology Stack:"),
-                " R, Shiny, bslib (Bootstrap 5), DT, readxl, openxlsx, stringr, promises, future"
-              ),
-              tags$p(
-                tags$strong("Version:"),
-                " 2.1.0 (UI/UX Enhanced)",
-                tags$br(),
-                tags$strong("Last Updated:"),
-                " November 2025"
+              class = "text-center",
+              style = "margin: 2rem 0;",
+              tags$a(
+                href = "https://github.com/pablovanegas/shiny_data_extractor", # PLACEHOLDER: REEMPLAZAR
+                target = "_blank",
+                class = "btn btn-primary btn-lg",
+                style = "padding: 0.75rem 2rem; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);",
+                tags$i(class = "fab fa-github", style = "margin-right: 0.75rem; font-size: 1.3rem;"),
+                "View Source Code on GitHub",
+                tags$i(class = "fas fa-external-link-alt", style = "margin-left: 0.5rem; font-size: 0.9rem;")
               )
             )
           )
         )
+      ),
+      
+      # Value Proposition Section (Adapted from Agent suggestion)
+      card(
+        card_header(
+          tags$h4(
+            tags$i(class = "fas fa-lightbulb", style = "margin-right: 0.5rem; color: var(--bs-warning);"),
+            "Why This Tool Matters",
+            style = "margin: 0;"
+          )
+        ),
+        card_body(
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            # Use Cases
+            div(
+              tags$h5(
+                tags$i(class = "fas fa-chart-line", style = "margin-right: 0.5rem; color: var(--bs-primary);"),
+                "Real-World Applications"
+              ),
+              tags$ul(
+                class = "list-unstyled",
+                style = "line-height: 1.8;",
+                tags$li(tags$i(class = "fas fa-check-circle text-success me-2"), tags$strong("Lead Generation:"), " Extract contacts from business directories."),
+                tags$li(tags$i(class = "fas fa-check-circle text-success me-2"), tags$strong("Data Cleaning:"), " Normalize messy datasets before analysis."),
+                tags$li(tags$i(class = "fas fa-check-circle text-success me-2"), tags$strong("Research Automation:"), " Accelerate data prep for NLP projects.")
+              )
+            ),
+            
+            # Architecture Highlights (For Tech Recruiters)
+            div(
+              tags$h5(
+                tags$i(class = "fas fa-code-branch", style = "margin-right: 0.5rem; color: var(--bs-info);"),
+                "Scalable Architecture"
+              ),
+              tags$ul(
+                class = "list-unstyled",
+                style = "line-height: 1.8;",
+                tags$li(tags$i(class = "fas fa-layer-group text-secondary me-2"), tags$strong("Modular:"), " Decoupled UI/Logic for easy maintenance."),
+                tags$li(tags$i(class = "fas fa-bolt text-secondary me-2"), tags$strong("Async Pipeline:"), " Non-blocking processes for heavy workloads."),
+                tags$li(tags$i(class = "fas fa-robot text-secondary me-2"), tags$strong("Extensible:"), " Ready for NLP model integration.")
+              )
+            )
+          )
+        )
+      ),
+      
+      # Technical Limitations (Honesty Section)
+      card(
+        class = "bg-light border-start border-warning border-4",
+        card_body(
+          tags$h5(tags$i(class = "fas fa-exclamation-triangle text-warning me-2"), "Big Data Constraints & Roadmap"),
+          tags$p(class = "small text-muted mb-0", 
+                 "Current architecture relies on in-memory processing (R base). For enterprise-scale datasets (>5GB), future versions will integrate SQL backends or out-of-core libraries like `arrow` or `polars` to bypass RAM limitations.")
+        )
       )
     )
   ),
-
+  
   # ============================================================================
   # Navbar Items (Dark Mode Toggle)
   # ============================================================================
@@ -407,9 +371,7 @@ ui <- page_navbar(
     tags$div(
       class = "text-muted small",
       style = "padding: 0.5rem 1rem; display: flex; align-items: center;",
-      "© 2025 Data Extractor | Built with ",
-      tags$i(class = "fas fa-heart text-danger", style = "margin: 0 0.25rem;"),
-      " using R Shiny & bslib"
+      "© 2025 Data Extractor"
     )
   )
 )
