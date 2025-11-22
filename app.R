@@ -13,19 +13,21 @@ if (!require("shiny")) {
   library(shiny)
 }
 
+
+if (!require("shinyWidgets")) {
+  install.packages("shinyWidgets")
+  library(shinyWidgets)
+}
+
+
 if (!require("DT")) {
   install.packages("DT")
   library(DT)
 }
 
-if (!require("shinythemes")) {
-  install.packages("shinythemes")
-  library(shinythemes)
-}
-
-if (!require("shinyWidgets")) {
-  install.packages("shinyWidgets")
-  library(shinyWidgets)
+if (!require("bslib")) {
+  install.packages("bslib")
+  library(bslib)
 }
 
 if (!require("readxl")) {
@@ -42,6 +44,8 @@ if (!require("stringr")) {
   install.packages("stringr")
   library(stringr)
 }
+
+
 
 # Optional packages for async processing (install if needed for large files)
 if (!require("promises")) {

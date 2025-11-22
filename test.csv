@@ -1,0 +1,9 @@
+ID,Nombre,Notas,Contacto_Directo,Sitio_Web
+1,Juan Pérez,"Por favor enviar detalles a juan.perez@ejemplo.com lo antes posible.",555-0102,"https://www.juanperez.com"
+2,Empresa ABC,"Interesados en el proyecto. Llamar al +1 (555) 123-4567 para discutir.",contacto@empresa-abc.net,"www.empresa-abc.net"
+3,Soporte Técnico,"Para ayuda urgente visite http://ayuda.tech-soluciones.io o escriba un correo.",soporte@tech-soluciones.io,
+4,Usuario Anónimo,"Texto sin información relevante aquí.",,"http://google.com"
+5,María González,"Mi correo personal es maria.gonzalez99@gmail.com y el del trabajo es mgonzalez@corporativo.org.","(415) 555-9988","https://linkedin.com/in/maria-gonzalez"
+6,Datos Mezclados,"Encontré este recurso: ftp://archivos.servidor.com/publico - Contacto alternativo: admin@servidor.com","+34 91 123 45 67","www.servidor.com/inicio"
+7,Sin Datos,"Solo texto de relleno para probar filas vacías.",,
+8,Formato Raro,"Info dispersa: info@startup.io entre texto. Tel: 1-800-555-0199.",,https://startup.io/equipo
